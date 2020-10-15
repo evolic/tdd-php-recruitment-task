@@ -44,7 +44,9 @@ class ItemTest extends TestCase
     {
         $this->expectException(QuantityTooLowException::class);
 
-        $product = (new Product())->setMinimumQuantity(10);
+        $product = (new Product())
+            ->setMinimumQuantity(10)
+            ->setUnitPrice(1000);
 
         $item = new Item($product, 10);
         $item->setQuantity(9);
