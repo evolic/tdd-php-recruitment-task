@@ -30,7 +30,9 @@ class Item
     public function __construct(Product $product, int $quantity)
     {
         if ($quantity < $product->getMinimumQuantity()) {
-            throw new \InvalidArgumentException('Given quantity is less than minimum quantity set for specified product');
+            throw new \InvalidArgumentException(
+                'Given quantity is less than minimum quantity set for specified product'
+            );
         }
 
         $this->product = $product;

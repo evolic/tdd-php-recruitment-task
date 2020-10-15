@@ -62,7 +62,7 @@ class Order
             'id' => $this->id,
         ];
 
-        $data['items'] = array_reduce($this->items, function(array $carrier, Item $item) {
+        $data['items'] = array_reduce($this->items, function (array $carrier, Item $item) {
             $carrier[] = [
                 'id' => $item->getProduct()->getId(),
                 'quantity' => $item->getQuantity(),
@@ -72,7 +72,7 @@ class Order
             return $carrier;
         }, []);
 
-        $data['total_price'] = array_reduce($this->items, function(int $totalPrice, Item $item) {
+        $data['total_price'] = array_reduce($this->items, function (int $totalPrice, Item $item) {
             $totalPrice += $item->getProduct()->getUnitPrice() * $item->getQuantity();
 
             return $totalPrice;
