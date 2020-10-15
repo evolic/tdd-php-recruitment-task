@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Recruitment\Tests\Cart;
 
+use OutOfBoundsException;
 use PHPUnit\Framework\TestCase;
 use Recruitment\Cart\Cart;
 use Recruitment\Entity\Order;
@@ -91,10 +92,13 @@ class CartTest extends TestCase
     /**
      * @test
      * @dataProvider getNonExistentItemIndexes
-     * @expectedException \OutOfBoundsException
+     *
+     * @param int $index
      */
     public function itThrowsExceptionWhileGettingNonExistentItem(int $index): void
     {
+        $this->expectException(OutOfBoundsException::class);
+
         $product = $this->buildTestProduct(1, 15000);
 
         $cart = new Cart();
