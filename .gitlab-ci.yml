@@ -8,7 +8,7 @@ phpunit:
     - ./vendor/bin/phpunit
     - cat ./report/phpunit.txt
 
-code sniffer:
+code_sniffer:
   stage: test
   script:
     - composer install -q

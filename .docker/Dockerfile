@@ -1,4 +1,4 @@
-FROM php:7.2
+FROM php:7.4
 
 RUN apt-get update -y
 RUN apt-get install -y zip git
