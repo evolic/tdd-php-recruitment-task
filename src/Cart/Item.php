@@ -81,6 +81,14 @@ class Item
         return $this->totalPrice;
     }
 
+    /**
+     * @return int
+     */
+    public function getTotalPriceGross(): int
+    {
+        return (int)($this->totalPrice * (1 + $this->product->getTaxRate()));
+    }
+
     private function calculateTotalPrice(): void
     {
         $this->totalPrice = $this->product->getUnitPrice() * $this->quantity;

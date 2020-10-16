@@ -16,13 +16,18 @@ class ItemTest extends TestCase
      */
     public function itAcceptsConstructorArgumentsAndReturnsData(): void
     {
-        $product = (new Product())->setUnitPrice(10000);
+        $product = (new Product())
+            ->setId(1)
+            ->setUnitPrice(10000)
+            ->setTaxRate(0.23)
+        ;
 
         $item = new Item($product, 10);
 
         $this->assertEquals($product, $item->getProduct());
         $this->assertEquals(10, $item->getQuantity());
         $this->assertEquals(100000, $item->getTotalPrice());
+        $this->assertEquals(123000, $item->getTotalPriceGross());
     }
 
     /**

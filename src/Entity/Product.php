@@ -28,6 +28,11 @@ class Product
     private int $minimumQuantity = 1;
 
     /**
+     * @var float
+     */
+    private float $taxRate;
+
+    /**
      * @param int $id
      *
      * @return Product
@@ -113,5 +118,29 @@ class Product
     public function getMinimumQuantity(): int
     {
         return $this->minimumQuantity;
+    }
+
+    /**
+     * @param float $taxRate
+     *
+     * @return $this
+     */
+    public function setTaxRate(float $taxRate): self
+    {
+        if ($taxRate < 0) {
+            throw new \InvalidArgumentException('Provided invalid tax rate');
+        }
+
+        $this->taxRate = $taxRate;
+
+        return $this;
+    }
+
+    /**
+     * @return float
+     */
+    public function getTaxRate(): float
+    {
+        return $this->taxRate;
     }
 }

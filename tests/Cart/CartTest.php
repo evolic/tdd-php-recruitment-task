@@ -17,7 +17,7 @@ class CartTest extends TestCase
      */
     public function itAddsOneProduct(): void
     {
-        $product = $this->buildTestProduct(1, 15000);
+        $product = $this->buildTestProduct(1, 15000, 0.23);
 
         $cart = new Cart();
         $cart->addProduct($product, 1);
@@ -32,8 +32,8 @@ class CartTest extends TestCase
      */
     public function itRemovesExistingProduct(): void
     {
-        $product1 = $this->buildTestProduct(1, 15000);
-        $product2 = $this->buildTestProduct(2, 10000);
+        $product1 = $this->buildTestProduct(1, 15000, 0.23);
+        $product2 = $this->buildTestProduct(2, 10000, 0.23);
 
         $cart = new Cart();
         $cart->addProduct($product1, 1)
@@ -50,7 +50,7 @@ class CartTest extends TestCase
      */
     public function itIncreasesQuantityWhenAddingAnExistingProduct(): void
     {
-        $product = $this->buildTestProduct(1, 15000);
+        $product = $this->buildTestProduct(1, 15000, 0.23);
 
         $cart = new Cart();
         $cart->addProduct($product, 1)
@@ -65,7 +65,7 @@ class CartTest extends TestCase
      */
     public function itUpdatesQuantityOfAnExistingItem(): void
     {
-        $product = $this->buildTestProduct(1, 15000);
+        $product = $this->buildTestProduct(1, 15000, 0.23);
 
         $cart = new Cart();
         $cart->addProduct($product, 1)
@@ -80,7 +80,7 @@ class CartTest extends TestCase
      */
     public function itAddsANewItemWhileSettingQuantityForNonExistentItem(): void
     {
-        $product = $this->buildTestProduct(1, 15000);
+        $product = $this->buildTestProduct(1, 15000, 0.23);
 
         $cart = new Cart();
         $cart->setQuantity($product, 1);
@@ -99,7 +99,7 @@ class CartTest extends TestCase
     {
         $this->expectException(OutOfBoundsException::class);
 
-        $product = $this->buildTestProduct(1, 15000);
+        $product = $this->buildTestProduct(1, 15000, 0.23);
 
         $cart = new Cart();
         $cart->addProduct($product, 1);
@@ -112,7 +112,7 @@ class CartTest extends TestCase
     public function removingNonExistentItemDoesNotRaiseException(): void
     {
         $cart = new Cart();
-        $cart->addProduct($this->buildTestProduct(1, 15000));
+        $cart->addProduct($this->buildTestProduct(1, 15000, 0.23));
         $cart->removeProduct(new Product());
 
         $this->assertCount(1, $cart->getItems());
@@ -124,18 +124,27 @@ class CartTest extends TestCase
     public function itClearsCartAfterCheckout(): void
     {
         $cart = new Cart();
-        $cart->addProduct($this->buildTestProduct(1, 15000));
-        $cart->addProduct($this->buildTestProduct(2, 10000), 2);
+        $cart->addProduct($this->buildTestProduct(1, 15000, 0.0));
+        $cart->addProduct($this->buildTestProduct(2, 10000, 0.05), 2);
+        $cart->addProduct($this->buildTestProduct(3, 10000, 0.08), 2);
+        $cart->addProduct($this->buildTestProduct(4, 10000, 0.23), 2);
 
         $order = $cart->checkout(7);
 
         $this->assertCount(0, $cart->getItems());
         $this->assertEquals(0, $cart->getTotalPrice());
         $this->assertInstanceOf(Order::class, $order);
-        $this->assertEquals(['id' => 7, 'items' => [
-            ['id' => 1, 'quantity' => 1, 'total_price' => 15000],
-            ['id' => 2, 'quantity' => 2, 'total_price' => 20000],
-        ], 'total_price' => 35000], $order->getDataForView());
+        $this->assertEquals([
+            'id' => 7,
+            'items' => [
+                ['id' => 1, 'quantity' => 1, 'total_price' => 15000, 'total_price_gross' => 15000, 'tax_rate' => '0.00%'],
+                ['id' => 2, 'quantity' => 2, 'total_price' => 20000, 'total_price_gross' => 21000, 'tax_rate' => '5.00%'],
+                ['id' => 3, 'quantity' => 2, 'total_price' => 20000, 'total_price_gross' => 21600, 'tax_rate' => '8.00%'],
+                ['id' => 4, 'quantity' => 2, 'total_price' => 20000, 'total_price_gross' => 24600, 'tax_rate' => '23.00%'],
+            ],
+            'total_price' => 75000,
+            'total_price_gross' => 82200,
+        ], $order->getDataForView());
     }
 
     public function getNonExistentItemIndexes(): array
@@ -148,8 +157,19 @@ class CartTest extends TestCase
         ];
     }
 
-    private function buildTestProduct(int $id, int $price): Product
+    /**
+     * @param int   $id
+     * @param int   $price
+     * @param float $taxRate
+     *
+     * @return Product
+     */
+    private function buildTestProduct(int $id, int $price, float $taxRate): Product
     {
-        return (new Product())->setId($id)->setUnitPrice($price);
+        return (new Product())
+            ->setId($id)
+            ->setUnitPrice($price)
+            ->setTaxRate($taxRate)
+        ;
     }
 }

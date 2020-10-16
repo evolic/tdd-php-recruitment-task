@@ -63,10 +63,14 @@ class Order
         ];
 
         $data['items'] = array_reduce($this->items, function (array $carrier, Item $item) {
+            $product = $item->getProduct();
+
             $carrier[] = [
-                'id' => $item->getProduct()->getId(),
+                'id' => $product->getId(),
                 'quantity' => $item->getQuantity(),
                 'total_price' => $item->getTotalPrice(),
+                'total_price_gross' => (int)($item->getTotalPrice() * ($product->getTaxRate() + 1)),
+                'tax_rate' => sprintf('%.2f%%', $product->getTaxRate() * 100),
             ];
 
             return $carrier;
@@ -76,6 +80,14 @@ class Order
             $totalPrice += $item->getProduct()->getUnitPrice() * $item->getQuantity();
 
             return $totalPrice;
+        }, 0);
+
+        $data['total_price_gross'] = array_reduce($this->items, function (int $totalPriceGross, Item $item) {
+            $product = $item->getProduct();
+
+            $totalPriceGross += (int)($product->getUnitPrice() * $item->getQuantity() * (1 + $product->getTaxRate()));
+
+            return $totalPriceGross;
         }, 0);
 
         return $data;
