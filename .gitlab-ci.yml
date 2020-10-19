@@ -1,15 +1,38 @@
+# Select image from https://hub.docker.com/_/php/
+image: php:7.4-cli
+
+# Select what we should cache
+cache:
+  paths:
+    - vendor/
+
+before_script:
+  # Install git, the php image doesn't have installed
+  - apt-get update -yqq
+  - apt-get install -yqq git
+  # Install zip dependencies
+  - apt-get install -yqq libzip-dev
+  # Install pgsql dependencies
+  - apt-get install -yqq libpq-dev
+
+  # Install mysql driver
+  - docker-php-ext-install zip
+
+  # Install composer
+  - curl -sS https://getcomposer.org/installer | php
+
 stages:
   - test
 
 phpunit:
   stage: test
   script:
-    - composer install -q
+    - php composer.phar install -q
     - ./vendor/bin/phpunit
     - cat ./report/phpunit.txt
 
 code_sniffer:
   stage: test
   script:
-    - composer install -q
+    - php composer.phar install -q
     - ./vendor/bin/phpcs -p
